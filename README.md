@@ -32,7 +32,7 @@ Start the development server with HMR:
 npm run dev
 ```
 
-Start the node server responisble for reading and writing the data on the JSON file:
+Start the node server responsible for reading and writing the data on the JSON file:
 
 ```bash
 node server.js
