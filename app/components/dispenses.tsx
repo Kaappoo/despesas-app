@@ -42,23 +42,23 @@ const Dispenses = () => {
     );
     setInputs(updatedInputs);
   };
+  const fetchData = async () => {
+    const data = await searchData();
+    if (data) {
+      setInputs(data.dispenses);
+      setSalary(data.salary);
+      
+      const total = data.dispenses.reduce(
+        (acc: any, input: any) => acc + input.value,
+        0
+      );
+      setTotalDispenses(Number(total));
+      
+      setloading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      const data = await searchData();
-      if (data) {
-        setInputs(data.dispenses);
-        setSalary(data.salary);
-        
-        const total = data.dispenses.reduce(
-          (acc: any, input: any) => acc + input.value,
-          0
-        );
-        setTotalDispenses(Number(total));
-        
-        setloading(false);
-      }
-    };
     fetchData();
   }, []);
   const salvar = () => {
@@ -66,7 +66,9 @@ const Dispenses = () => {
       salary: salary,
       dispenses: inputs,
     };
-    saveData(data);
+    saveData(data).then(() => {
+      fetchData();
+    })
   };
   return (
     <>
