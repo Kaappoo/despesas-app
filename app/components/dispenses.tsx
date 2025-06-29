@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import DispensesService from "../dispenses-manager/dispenses.service";
+import { NumericFormat } from 'react-number-format';
 
 const Dispenses = () => {
   const { saveData, searchData } = DispensesService();
@@ -77,14 +78,22 @@ const Dispenses = () => {
           <div className="flex gap-2 items-end">
             <label className="flex flex-col w-1/2">
               <span className="text-lg font-semibold">Salário</span>
-              <input
+              <NumericFormat
                 className="bg-gray-900 rounded-md pt-2 pb-2 pl-3 text-blue-50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                type="number"
+                thousandSeparator="."
+                decimalSeparator=","
+                prefix="R$ "
+                decimalScale={2}
+                fixedDecimalScale={true}
+                allowNegative={false}
+                value={salary / 100}
                 name="salary"
                 id="salary"
                 placeholder="Insira o salário.."
-                onChange={(e) => handleChangeSalary(Number(e.target.value))}
-                value={salary}
+                onValueChange={(values) =>{
+                  const valueAsInteger = values.floatValue ? Math.round(values.floatValue * 100) : 0;
+                  handleChangeSalary(Number(valueAsInteger));
+                }}
               />
             </label>
             <button
@@ -119,17 +128,20 @@ const Dispenses = () => {
                     X
                   </button>
                 </div>
-                <input
-                  type="text"
-                  name="value"
-                  id={"value" + input.id.toString()}
-                  placeholder="Insira o valor.."
+                <NumericFormat
                   className="bg-blue-50 rounded-md py-2 pl-3 text-black focus-visible:outline-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                  onChange={(e) =>
-                    handleInputValueChange(input.id, Number(e.target.value))
-                  }
-                  value={input.value}
-                />
+                  id={"value" + input.id.toString()}
+                  thousandSeparator="."
+                  decimalSeparator=","
+                  prefix="R$ "
+                  decimalScale={2}
+                  fixedDecimalScale={true}
+                  allowNegative={false}
+                  value={input.value / 100}
+                  onValueChange={(values) => {
+                    const valueAsInteger = values.floatValue ? Math.round(values.floatValue * 100) : 0;
+                    handleInputValueChange(input.id, valueAsInteger);
+                  }} />
               </div>
             ))}
             <button type="button" onClick={handleAddInput}>
@@ -143,13 +155,13 @@ const Dispenses = () => {
           }`}
         >
           <div className="flex gap-2 w-1/2 text-green-200 font-semibold text-2xl justify-between">
-            <span>Salario:</span> <span>R$ {salary.toFixed(2)}</span>
+            <span>Salario:</span> <span>R$ {(salary / 100).toFixed(2)}</span>
           </div>
           <div className="flex gap-2 w-1/2 text-green-200 font-semibold text-2xl justify-between">
-            <span>Gasto total:</span> R$ {totalDispenses.toFixed(2)}
+            <span>Gasto total:</span> R$ {(totalDispenses / 100).toFixed(2)}
           </div>
           <div className="flex gap-2 w-1/2 text-green-200 font-semibold text-2xl justify-between">
-            <span>Saldo:</span> R$ {(salary - totalDispenses).toFixed(2)}
+            <span>Saldo:</span> R$ {((salary - totalDispenses) / 100).toFixed(2)}
           </div>
         </div>
       </div>}
