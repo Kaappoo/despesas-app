@@ -26,16 +26,10 @@ npm install
 
 ### Development
 
-Start the development server with HMR:
+Start the development server with HMR and node api:
 
 ```bash
-npm run dev
-```
-
-Start the node server responsible for reading and writing the data on the JSON file:
-
-```bash
-node server.js
+npm run dev:full
 ```
 
 Your application will be available at `http://localhost:5173`.
