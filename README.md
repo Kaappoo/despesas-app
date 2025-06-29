@@ -32,6 +32,12 @@ Start the development server with HMR:
 npm run dev
 ```
 
+Start the node server responsible for reading and writing the data on the JSON file:
+
+```bash
+node server.js
+```
+
 Your application will be available at `http://localhost:5173`.
 
 ## Building for Production
