@@ -6,11 +6,13 @@
     "build": "react-router build",
     "dev": "react-router dev",
     "start": "react-router-serve ./build/server/index.js",
-    "typecheck": "react-router typegen && tsc"
+    "typecheck": "react-router typegen && tsc",
+    "dev:full": "concurrently -k -n \"APP,API\" --prefix-colors \"blue,green\" \"npm run dev\" \"node server.js\""
   },
   "dependencies": {
     "@react-router/node": "^7.5.0",
     "@react-router/serve": "^7.5.0",
+    "concurrently": "^9.2.0",
     "cors": "^2.8.5",
     "express": "^5.1.0",
     "isbot": "^5.1.17",
