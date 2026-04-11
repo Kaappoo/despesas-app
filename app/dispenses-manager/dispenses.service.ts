@@ -1,34 +1,26 @@
 const DispensesService = () => {
-    const saveData = async (dados: any) => {
-      try {
-        const answer = await fetch("http://localhost:3001/salvar-dados", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(dados),
-        });
-    
-        const texto = await answer.text();
-        console.log(texto);
-      } catch (err) {
-        console.error("Erro ao salvar dados:", err);
-      }
-    };
-
-    const searchData = async () => {
-      try {
-        const answer = await fetch("http://localhost:3001/buscar-dados", {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-        });
-
-        const texto = await answer.text();
-        
-        return JSON.parse(texto);
-      } catch (err) {
-        console.error("Erro ao buscar dados:", err);
-      }
+  const saveData = async (dados: any) => {
+    try {
+      localStorage.setItem("dispense_data", JSON.stringify(dados));
+      console.log("Dados salvos com sucesso no LocalStorage!");
+    } catch (err) {
+      console.error("Erro ao salvar dados no LocalStorage:", err);
     }
-    return {saveData, searchData};
-}
+  };
+
+  const searchData = async () => {
+    try {
+      const texto = localStorage.getItem("dispense_data");
+      if (!texto) {
+        return { salary: 100, dispenses: [] };
+      }
+      return JSON.parse(texto);
+    } catch (err) {
+      console.error("Erro ao buscar dados do LocalStorage:", err);
+      return { salary: 100, dispenses: [] };
+    }
+  };
+  return { saveData, searchData };
+};
 
 export default DispensesService;
