@@ -48,13 +48,13 @@ const Dispenses = () => {
     if (data) {
       setInputs(data.dispenses);
       setSalary(data.salary);
-      
+
       const total = data.dispenses.reduce(
         (acc: any, input: any) => acc + input.value,
         0
       );
       setTotalDispenses(Number(total));
-      
+
       setloading(false);
     }
   };
@@ -73,10 +73,10 @@ const Dispenses = () => {
   };
   return (
     <>
-      {!loading && <div className="flex justify-between w-full pt-8">
-        <div className="flex flex-col p-4 gap-8 rounded-2xl text-blue-50 font-medium w-full">
-          <div className="flex gap-2 items-end">
-            <label className="flex flex-col w-1/2">
+      {!loading && <div className="flex flex-col md:flex-row justify-between w-full pt-4 md:pt-8 gap-8 md:gap-4 md:px-0">
+        <div className="flex flex-col p-4 gap-8 rounded-2xl text-blue-50 font-medium w-full md:w-1/2">
+          <div className="flex flex-col sm:flex-row gap-4 sm:gap-2 sm:items-end">
+            <label className="flex flex-col w-full sm:w-1/2">
               <span className="text-lg font-semibold">Salário</span>
               <NumericFormat
                 className="bg-gray-900 rounded-md pt-2 pb-2 pl-3 text-blue-50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
@@ -90,7 +90,7 @@ const Dispenses = () => {
                 name="salary"
                 id="salary"
                 placeholder="Insira o salário.."
-                onValueChange={(values) =>{
+                onValueChange={(values) => {
                   const valueAsInteger = values.floatValue ? Math.round(values.floatValue * 100) : 0;
                   handleChangeSalary(Number(valueAsInteger));
                 }}
@@ -99,13 +99,13 @@ const Dispenses = () => {
             <button
               type="button"
               onClick={salvar}
-              className="bg-blue-500 rounded-md py-2 px-4 text-white font-bold cursor-pointer"
+              className="bg-blue-500 rounded-md py-2 px-4 text-white font-bold cursor-pointer w-full sm:w-auto mt-2 sm:mt-0"
             >
               Salvar
             </button>
           </div>
           <div className="flex flex-col justify-center w-full max-w-2xl p-4 bg-gray-900 rounded-2xl text-blue-50 font-medium gap-4">
-            <h2 className="font-bold">Dispesas</h2>
+            <h2 className="font-bold">Despesas</h2>
             <hr className="border-blue-50" />
             {inputs.map((input) => (
               <div key={input.id.toString()} className="flex flex-col gap-2">
@@ -115,7 +115,7 @@ const Dispenses = () => {
                     name="name"
                     id={"name" + input.id.toString()}
                     placeholder="Insira o nome.."
-                    className="rounded-md text-blue=50 focus-visible:outline-0"
+                    className="rounded-md text-blue-50 focus-visible:outline-0 w-full"
                     onChange={(e) =>
                       handleInputNameChange(input.id, e.target.value)
                     }
@@ -123,13 +123,13 @@ const Dispenses = () => {
                   />
                   <button
                     onClick={() => handleRemoveInput(input.id)}
-                    className="text-red-700 font-bold cursor-pointer"
+                    className="text-red-700 font-bold cursor-pointer p-2"
                   >
                     X
                   </button>
                 </div>
                 <NumericFormat
-                  className="bg-blue-50 rounded-md py-2 pl-3 text-black focus-visible:outline-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  className="bg-blue-50 rounded-md py-2 pl-3 text-black focus-visible:outline-0 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none w-full"
                   id={"value" + input.id.toString()}
                   thousandSeparator="."
                   decimalSeparator=","
@@ -144,24 +144,23 @@ const Dispenses = () => {
                   }} />
               </div>
             ))}
-            <button type="button" onClick={handleAddInput}>
+            <button type="button" onClick={handleAddInput} className="mt-2 text-left">
               <span className="text-blue-50 font-bold cursor-pointer">Adicionar despesa</span>
             </button>
           </div>
         </div>
         <div
-          className={`flex flex-col items-center justify-center p-3 w-full sticky top-10 h-[90vh] rounded-2xl gap-10 bg-green-800 ${
-            totalDispenses > salary ? "bg-red-700" : "bg-green-800"
-          }`}
+          className={`flex flex-col items-center justify-center p-6 w-full md:w-1/2 static md:sticky md:top-10 h-auto md:h-[90vh] rounded-2xl gap-6 md:gap-10 transition-colors duration-300 ${totalDispenses > salary ? "bg-red-700" : "bg-green-800"
+            }`}
         >
-          <div className="flex gap-2 w-1/2 text-green-200 font-semibold text-2xl justify-between">
-            <span>Salario:</span> <span>R$ {(salary / 100).toFixed(2)}</span>
+          <div className="flex gap-2 w-full sm:w-3/4 md:w-3/4 xl:w-1/2 text-green-200 font-semibold text-xl md:text-2xl justify-between">
+            <span>Salário:</span> <span>R$ {(salary / 100).toFixed(2)}</span>
           </div>
-          <div className="flex gap-2 w-1/2 text-green-200 font-semibold text-2xl justify-between">
-            <span>Gasto total:</span> R$ {(totalDispenses / 100).toFixed(2)}
+          <div className="flex gap-2 w-full sm:w-3/4 md:w-3/4 xl:w-1/2 text-green-200 font-semibold text-xl md:text-2xl justify-between">
+            <span>Gasto total:</span> <span>R$ {(totalDispenses / 100).toFixed(2)}</span>
           </div>
-          <div className="flex gap-2 w-1/2 text-green-200 font-semibold text-2xl justify-between">
-            <span>Saldo:</span> R$ {((salary - totalDispenses) / 100).toFixed(2)}
+          <div className="flex gap-2 w-full sm:w-3/4 md:w-3/4 xl:w-1/2 text-green-200 font-semibold text-xl md:text-2xl justify-between">
+            <span>Saldo:</span> <span>R$ {((salary - totalDispenses) / 100).toFixed(2)}</span>
           </div>
         </div>
       </div>}
