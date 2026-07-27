@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import DispensesService, {
   type CategoryGroup,
   type ExpenseItem,
@@ -120,10 +120,15 @@ const COLOR_PALETTE: Record<string, ColorTheme> = {
 const COLOR_KEYS = Object.keys(COLOR_PALETTE);
 
 const Dispenses = () => {
-  const { saveData, searchData } = DispensesService();
+  const { saveData, searchData, exportToFile, parseImportData } = DispensesService();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [groups, setGroups] = useState<CategoryGroup[]>([]);
   const [salary, setSalary] = useState(500000);
   const [loading, setLoading] = useState(true);
+  const [feedback, setFeedback] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
   const [draggedItem, setDraggedItem] = useState<{
     itemId: string;
     sourceGroupId: string;
@@ -381,9 +386,52 @@ const Dispenses = () => {
     setDraggedItem(null);
   };
 
+  const showFeedback = (type: "success" | "error", message: string) => {
+    setFeedback({ type, message });
+    setTimeout(() => {
+      setFeedback(null);
+    }, 4000);
+  };
+
+  const handleExport = () => {
+    try {
+      exportToFile({ salary, groups });
+      showFeedback("success", "Arquivo exportado com sucesso!");
+    } catch (err: any) {
+      showFeedback("error", "Erro ao exportar arquivo.");
+    }
+  };
+
+  const handleImportButtonClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const content = event.target?.result as string;
+        const importedData = parseImportData(content);
+        setSalary(importedData.salary);
+        setGroups(importedData.groups);
+        await saveData(importedData);
+        showFeedback("success", "Dados importados e salvos com sucesso!");
+      } catch (err: any) {
+        showFeedback("error", err.message || "Erro ao importar arquivo.");
+      } finally {
+        if (e.target) e.target.value = "";
+      }
+    };
+    reader.readAsText(file);
+  };
+
   const salvar = () => {
     saveData({ salary, groups }).then(() => {
       fetchData();
+      showFeedback("success", "Dados salvos com sucesso!");
     });
   };
 
@@ -393,9 +441,32 @@ const Dispenses = () => {
         <div className="flex flex-col xl:flex-row justify-between w-full pt-4 xl:pt-8 gap-8 xl:gap-6 xl:px-0">
           {/* Left / Main Section: Category Group Boxes */}
           <div className="flex flex-col p-4 gap-6 rounded-2xl text-blue-50 font-medium w-full xl:w-2/3">
+            {/* Feedback Alert Toast */}
+            {feedback && (
+              <div
+                className={`p-3.5 px-5 rounded-2xl text-sm font-semibold flex items-center justify-between transition-all duration-300 shadow-lg ${
+                  feedback.type === "success"
+                    ? "bg-emerald-950/90 text-emerald-200 border border-emerald-500/40"
+                    : "bg-red-950/90 text-red-200 border border-red-500/40"
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="text-base">{feedback.type === "success" ? "✓" : "⚠️"}</span>
+                  <span>{feedback.message}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setFeedback(null)}
+                  className="text-xs opacity-70 hover:opacity-100 ml-4 p-1"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+
             {/* Top Bar: Salary & Actions */}
             <div className="flex flex-col sm:flex-row gap-4 sm:items-end justify-between bg-gray-900 p-4 rounded-2xl border border-gray-800 shadow-lg">
-              <label className="flex flex-col w-full sm:w-1/2">
+              <label className="flex flex-col w-full sm:w-1/3">
                 <span className="text-lg font-semibold mb-1 text-gray-200">
                   Salário Mensal
                 </span>
@@ -420,18 +491,46 @@ const Dispenses = () => {
                 />
               </label>
 
-              <div className="flex gap-3 w-full sm:w-auto">
+              <div className="flex flex-wrap sm:flex-nowrap gap-2 sm:gap-2.5 w-full sm:w-auto">
                 <button
                   type="button"
                   onClick={handleAddGroup}
-                  className="flex-1 sm:flex-none bg-indigo-600/80 hover:bg-indigo-600 transition-all duration-200 rounded-xl py-2.5 px-4 text-white font-bold cursor-pointer flex items-center justify-center gap-2 shadow-md hover:shadow-indigo-500/20"
+                  className="flex-1 sm:flex-none bg-indigo-600/80 hover:bg-indigo-600 transition-all duration-200 rounded-xl py-2.5 px-3 text-white font-bold cursor-pointer flex items-center justify-center gap-1.5 shadow-md hover:shadow-indigo-500/20 text-sm"
+                  title="Criar nova categoria de despesas"
                 >
-                  <span>+ Criar Categoria</span>
+                  <span>+ Categoria</span>
                 </button>
+
+                <button
+                  type="button"
+                  onClick={handleExport}
+                  className="flex-1 sm:flex-none bg-emerald-600/80 hover:bg-emerald-600 transition-all duration-200 rounded-xl py-2.5 px-3 text-white font-bold cursor-pointer flex items-center justify-center gap-1.5 shadow-md hover:shadow-emerald-500/20 text-sm"
+                  title="Exportar valores para um arquivo JSON"
+                >
+                  <span>📥 Exportar</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleImportButtonClick}
+                  className="flex-1 sm:flex-none bg-amber-600/80 hover:bg-amber-600 transition-all duration-200 rounded-xl py-2.5 px-3 text-white font-bold cursor-pointer flex items-center justify-center gap-1.5 shadow-md hover:shadow-amber-500/20 text-sm"
+                  title="Importar valores de um arquivo JSON"
+                >
+                  <span>📤 Importar</span>
+                </button>
+
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  accept=".json,application/json"
+                  className="hidden"
+                />
+
                 <button
                   type="button"
                   onClick={salvar}
-                  className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-500 transition-all duration-200 rounded-xl py-2.5 px-6 text-white font-bold cursor-pointer shadow-md hover:shadow-blue-500/20"
+                  className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-500 transition-all duration-200 rounded-xl py-2.5 px-4 text-white font-bold cursor-pointer shadow-md hover:shadow-blue-500/20 text-sm"
                 >
                   Salvar
                 </button>
@@ -533,7 +632,7 @@ const Dispenses = () => {
                         >
                           {/* Drag Handle Icon */}
                           <div
-                            className="text-gray-500 hover:text-gray-300 cursor-grab font-bold text-lg select-none px-1"
+                            className="hidden sm:block text-gray-500 hover:text-gray-300 cursor-grab font-bold text-lg select-none px-1"
                             title="Arraste para mover de categoria"
                           >
                             ⋮⋮
